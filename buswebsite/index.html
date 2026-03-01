@@ -1,0 +1,286 @@
+<!doctype html>
+<html>
+  <head>
+    <!-- need to generate journeys.json and timetable.json -->
+    <!-- see https://git.alifeee.net/bus_bot/tree/busbot/mockdata/generate.py?h=talk/mocked-bot -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/picnic" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      header {
+        width: 100%;
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 8px 1px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        span {
+          margin: 1rem;
+          border-radius: 1.5rem;
+          border: 1px solid gray;
+          padding: 1rem 2rem;
+          font-weight: bold;
+          color: #ff3d00;
+        }
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: start;
+        font-family:
+          "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+        position: relative;
+      }
+      h1 {
+        display: flex;
+        align-items: center;
+        margin: 0 0 0 1rem;
+        svg {
+          width: 3rem;
+        }
+      }
+      hr {
+        min-width: 20rem;
+        border: 4px solid #ff3d00;
+        margin-bottom: 2rem;
+      }
+      #main {
+        display: flex;
+        flex-direction: column;
+      }
+      .qr {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 12rem;
+        image-rendering: pixelated;
+      }
+
+      .loader {
+        width: 48px;
+        height: 48px;
+        border: 5px solid #fff;
+        border-bottom-color: #ff3d00;
+        border-radius: 50%;
+        display: inline-block;
+        box-sizing: border-box;
+        animation: rotation 1s linear infinite;
+      }
+
+      @keyframes rotation {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+    <script src="tsparticles.confetti.bundle.min.js.js"></script>
+    <script>
+      DELAY_INITIAL = 1200;
+      DELAY_START = 1500;
+      DELAY_DATE = 900;
+      DELAY_TIME = 3000;
+      let journeys = {};
+      let timetable = {};
+      let main;
+      let p1 = fetch("journeys.json")
+        .then((data) => data.json())
+        .then((json) => (journeys = json));
+      let p2 = fetch("timetable.json")
+        .then((data) => data.json())
+        .then((json) => (timetable = json));
+
+      function removeChildren() {
+        while (main.firstChild) {
+          main.removeChild(main.firstChild);
+        }
+      }
+
+      function addSpinner() {
+        removeChildren();
+        const span = document.createElement("span");
+        span.classList.add("loader");
+        main.appendChild(span);
+      }
+
+      function addStartButton() {
+        removeChildren();
+        const button = document.createElement("button");
+        button.innerText = "start";
+        button.addEventListener("click", start);
+        main.appendChild(button);
+      }
+
+      async function start() {
+        let dates = journeys.data[0].journeys
+          .map((j) =>
+            j.start_date.replace(
+              /([0-9]{4})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2}).*/,
+              "$1-$2-$3T$4:$5",
+            ),
+          )
+          .map((d) => new Date(Date.parse(d)));
+        let tsdays = [
+          ...new Set(
+            dates.map((d) =>
+              Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()),
+            ),
+          ),
+        ];
+        let days = tsdays.map((tsd) => new Date(tsd));
+        addSpinner();
+        await new Promise((resolve) => setTimeout(resolve, DELAY_START));
+        removeChildren();
+        days.forEach((day) => {
+          const dayel = document.createElement("button");
+          dayel.dataset.year = day.getFullYear();
+          dayel.dataset.month = day.getMonth();
+          dayel.dataset.date = day.getDate();
+          dayel.addEventListener("click", clickDate);
+          dayel.innerText =
+            ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][day.getDay()] +
+            " " +
+            day.getUTCDate() +
+            " " +
+            [
+              "",
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec",
+            ][day.getMonth()];
+          main.appendChild(dayel);
+        });
+      }
+
+      async function clickDate(e) {
+        console.log(e.target);
+        let jrnys = journeys.data[0].journeys.filter((j) => {
+          let d = new Date(
+            Date.parse(
+              j.start_date.replace(
+                /([0-9]{4})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2}).*/,
+                "$1-$2-$3T$4:$5",
+              ),
+            ),
+          );
+          if (
+            d.getFullYear() == e.target.dataset.year &&
+            d.getMonth() == e.target.dataset.month &&
+            d.getDate() == e.target.dataset.date
+          ) {
+            return true;
+          } else {
+            return false;
+          }
+        });
+        console.log(jrnys);
+        addSpinner();
+        await new Promise((resolve) => setTimeout(resolve, DELAY_DATE));
+        removeChildren();
+        jrnys.forEach((j) => {
+          const jrnel = document.createElement("button");
+          jrnel.innerText = j.start_date.replace(
+            /([0-9]{4})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2}).*/,
+            "$4:$5",
+          );
+          jrnel.dataset.id = j.id;
+          jrnel.addEventListener("click", clickTime);
+          main.appendChild(jrnel);
+        });
+      }
+
+      async function clickTime(e) {
+        let capacity = timetable[e.target.dataset.id];
+        addSpinner();
+        await new Promise((resolve) => setTimeout(resolve, DELAY_TIME));
+        removeChildren();
+        if (capacity > 0) {
+          const notice = document.createElement("p");
+          notice.innerText = `${capacity} seats left on this trip`;
+          main.appendChild(notice);
+          const button = document.createElement("button");
+          button.innerText = "book seat";
+          button.addEventListener("click", win);
+          main.appendChild(button);
+        } else {
+          const notice = document.createElement("p");
+          notice.innerText = "sorry! this journey has no seats available";
+          main.appendChild(notice);
+          const button = document.createElement("button");
+          button.addEventListener("click", (e) => window.location.reload());
+          button.innerText = "back";
+          main.appendChild(button);
+        }
+      }
+
+      function win(e) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", (e) => {
+        main = document.getElementById("main");
+        Promise.all([
+          p1,
+          p2,
+          new Promise((resolve) => setTimeout(resolve, DELAY_INITIAL)),
+        ]).then((_) => {
+          addStartButton();
+        });
+      });
+
+      function book() {}
+    </script>
+  </head>
+  <body>
+    <header>
+      <h1>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200">
+          <path
+            fill="#FEFEFE"
+            d="M597.218 19.682c2.255.006 4.51.008 6.765.011 21.802.037 43.372.46 65.017 3.307l4.164.52C748.482 33.001 822.093 57.285 888 95l2.563 1.465c25.904 14.93 50.692 32.003 73.697 51.095 2.44 2.02 4.904 4.009 7.365 6.002 9.117 7.484 18.145 14.977 26.379 23.438 1.87 1.873 3.794 3.599 5.808 5.312 7.615 6.549 14.72 13.794 21.223 21.442 2.155 2.463 4.383 4.845 6.623 7.23A333.1 333.1 0 0 1 1049 231c.993 1.203 1.988 2.405 2.984 3.605 23.587 28.502 43.419 59.904 61.016 92.395l1.291 2.358C1155.786 405.372 1177.597 492.727 1181 592l.05 2.3c.09 4.57.05 9.131-.05 13.7l-.054 2.851C1179.009 702.812 1155.719 791.982 1048 970l-1.457 1.757c-6.19 7.457-12.595 14.677-19.19 21.777a503.692 503.692 0 0 0-3.927 4.321c-5.39 5.971-10.936 11.758-16.614 17.457l-1.979 1.994a226.717 226.717 0 0 1-11.965 11.07c-2.617 2.275-5.143 4.636-7.68 6.999-5.545 5.115-11.298 9.911-17.188 14.625-1.13.922-2.261 1.846-3.39 2.77-22.346 18.197-46.53 35.009-71.61 49.23l-1.988 1.135c-5.303 3.02-10.647 5.958-16.012 8.865l-2.577 1.402C794.522 1155.59 706.573 1178.051 612 1181l-2.822.07c-82.217 1.736-166.031-14.69-241.178-48.07l-3.145-1.394c-22.262-9.929-44.095-20.804-64.855-33.606l-2.302-1.417c-23.692-14.643-46.3-30.747-67.698-48.583l-1.757-1.457c-7.457-6.19-14.677-12.595-21.777-19.19a503.692 503.692 0 0 0-4.321-3.927c-5.971-5.39-11.758-10.936-17.458-16.614l-1.993-1.979a226.717 226.717 0 0 1-11.07-11.965c-2.275-2.617-4.636-5.143-6.999-7.68C159.51 979.642 154.714 973.89 150 968c-.922-1.13-1.846-2.261-2.77-3.39C93.143 898.192 53.904 818.295 19 592l.054-2.851c1.862-88.412 23.826-174.224 128.54-353.439 1.92-2.335 3.787-4.71 5.656-7.085 3.306-4.148 6.798-8.096 10.379-12.008a401.867 401.867 0 0 0 5.656-6.394c3.766-4.314 7.658-8.498 11.59-12.66l2.129-2.256c6.647-7.023 13.295-13.942 20.644-20.237 2.496-2.197 4.92-4.459 7.343-6.735A333.478 333.478 0 0 1 231 151c1.203-.993 2.405-1.988 3.605-2.984C263.106 124.43 294.508 104.593 327 87l2.39-1.307c60.258-32.851 127.603-52.93 195.485-61.943l3.448-.458c3.887-.483 7.779-.906 11.677-1.292l2.66-.264c18.19-1.743 36.303-2.1 54.558-2.054Z"
+          />
+          <path
+            d="M578 402c-2.098 2.277-4.053 3.71-6.816 5.094l-2.288 1.166-2.458 1.24c-28.044 14.478-56.31 32.988-77.985 56.172C487 467 487 467 485 467l-.7 1.68c-1.653 2.949-3.753 5.02-6.113 7.445-36.445 38.726-53.528 92.31-53.562 144.688l-.006 2.434c.003 10.091.657 19.786 2.381 29.753l.536 3.31c3.129 19.01 7.42 37.122 15.464 54.69l1.03 2.288c9.755 21.557 21.835 41.233 38.02 58.61 1.745 1.881 3.385 3.808 5.012 5.79 3.297 3.862 7.056 7.054 10.938 10.312l2.652 2.313c33.518 28.793 75.992 44.06 119.466 49.331 3.035.375 6.063.79 9.093 1.204 13.886 1.79 27.556 2.425 41.539 2.402l2.403-.002c18.53.065 18.53.065 36.847-2.248a274.05 274.05 0 0 1 6.355-.418c7.738-.52 15.311-1.627 22.957-2.894l2.057-.337c9.647-1.584 19.166-3.402 28.63-5.855 2.12-.525 4.247-.984 6.384-1.433 12.134-2.61 23.883-6.242 35.68-10.063l2.418-.78c8.508-2.75 16.87-5.632 25.09-9.175 2.855-1.228 5.756-2.3 8.679-3.357 7.008-2.686 13.634-5.976 20.289-9.42 2.782-1.433 5.577-2.842 8.371-4.252 17.285-8.78 33.58-18.482 49.207-29.957A96.35 96.35 0 0 1 934 758c-4.053 14.405-13.176 28.996-22 41l-1.327 1.828c-9.997 13.75-20.694 26.365-32.673 38.422l-2.769 2.797C869.128 848.122 862.756 853.665 856 859l-1.793 1.445C839.174 872.535 822.826 882.626 806 892l-2.186 1.24c-10.612 5.998-21.582 10.937-32.814 15.635l-2.008.84A486.375 486.375 0 0 1 745 919c-1.294.483-2.587.969-3.879 1.457-20.135 7.41-40.937 12.22-62.012 16.082-2.151.38-2.151.38-4.109 1.461-2.48.348-4.95.66-7.438.938-4.63.518-9.197 1.158-13.777 2.027-39.668 7.34-81.88 5.677-121.785 1.035l-3.672-.422C493.234 937.371 458.72 927.69 427 912l-2.607-1.285c-23.035-11.46-45.226-25.543-63.909-43.348-2.084-1.986-4.208-3.841-6.421-5.68C327.269 838.271 307.276 805.066 295 772c-.685-1.605-1.372-3.21-2.063-4.813-2.73-6.825-4.522-13.97-6.382-21.071-.466-1.778-.948-3.55-1.434-5.323-8.899-34.804-7.663-75.08.879-109.793l.739-3.122c3.603-15.175 7.81-29.665 14.261-43.878l1.365-3.008C315.837 551.609 332.534 524.397 355 501l1.625-1.708C364.847 490.693 373.43 483.061 383 476l1.67-1.248c26.668-19.87 56.644-36.92 88.185-47.643 3.056-1.078 5.99-2.308 8.957-3.609 7.524-3.191 15.324-5.328 23.188-7.5l3.543-.992C558.082 401.462 558.082 401.462 578 402Z"
+          />
+          <path
+            fill="#007DBC"
+            d="m686 281 1.912.365C707.504 285.1 726.834 289.433 746 295l2.266.646c44.42 12.759 89.905 32.806 125.994 61.957 1.514 1.215 3.052 2.399 4.595 3.577 31.154 24.225 56.114 59.634 62.69 99.085 2.186 17.921 2.289 39.252-2.545 56.735l-.668 2.421c-8.596 29.977-24.552 56.236-45.816 78.876a171.431 171.431 0 0 0-5.953 6.765C877.923 614.97 867.433 623.09 857 631l-1.776 1.359C822.182 657.553 785.174 674.665 746 688l-3.622 1.257a294.184 294.184 0 0 1-25.028 7.318c-1.956.483-3.909.978-5.862 1.474-17.929 4.499-36.034 7.508-54.372 9.761-3.05.377-6.097.77-9.145 1.165-21.102 2.67-42.045 3.195-63.298 3.155-3.461-.005-6.923 0-10.384.007-2.237 0-4.474-.002-6.71-.004l-3.082.006A158.234 158.234 0 0 1 546 711c1-2 1-2 3.008-2.863l2.687-.88 3.06-1.022 3.37-1.11C632.01 680.113 712.751 645.877 788 554l.91-1.815c4.356-8.89 6.53-17.486 8.09-27.185l.555-2.887c3.733-26.101-5.582-50.108-20.555-71.113-3.42-4.555-7.13-8.824-11-13l-1.43-1.546c-7.518-8.03-15.708-14.952-24.57-21.454l-1.842-1.354c-28.409-20.665-61.3-36.244-95.014-46.004a224.438 224.438 0 0 1-4.967-1.56c-8.303-2.667-16.609-4.543-25.177-6.144l-2.05-.388c-31.585-5.965-62.825-7.944-94.912-7.868-2.386.006-4.773.008-7.16.01-23.414.032-46.6.616-69.878 3.308-1.36.147-2.718.293-4.078.438-29.35 3.137-58.84 7.113-87.711 13.289-4.543.962-9.1 1.8-13.672 2.614-11.66 2.077-23.24 4.426-34.808 6.959-2.927.64-5.855 1.27-8.784 1.901-10.135 2.2-20.196 4.537-30.177 7.367-5.56 1.537-5.56 1.537-7.77.432 39.881-25.803 82.191-48.582 126-67l3.226-1.37C416.612 304.663 453.35 292.777 491 285l4.863-1.043A566.689 566.689 0 0 1 511 281l2.774-.512C569.766 270.41 630.104 270.197 686 281Z"
+          />
+          <path
+            fill="#3994C9"
+            d="M258 384c2.125.938 2.125.938 4 2-3.265 1.884-6.281 2.493-10 3 3.75-3.875 3.75-3.875 6-5Z"
+          />
+        </svg>
+        weels
+      </h1>
+      <span class="login">Log in</span>
+    </header>
+    <h2>book your bus!</h2>
+    <hr />
+    <section id="main">
+      <span class="loader"></span>
+    </section>
+    <img src="../images/buswebsite_qr.png" class="qr" />
+  </body>
+</html>

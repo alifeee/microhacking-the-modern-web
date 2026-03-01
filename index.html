@@ -15,13 +15,256 @@
 
     <!-- Theme used for syntax highlighted code -->
     <link rel="stylesheet" href="plugin/highlight/monokai.css" />
+    <style>
+      .qr {
+        image-rendering: pixelated;
+      }
+    </style>
   </head>
   <body>
     <div class="reveal">
       <div class="slides">
-        <section>Slide 1</section>
-        <section data-visibility="hidden">Slide X</section>
-        <section>Slide 2</section>
+        <section data-auto-animate>
+          <h1>Bus Bot</h1>
+        </section>
+        <section data-auto-animate>
+          <h1>Bus Bot</h1>
+          <ol>
+            <li>what did the website not do?</li>
+            <li>how did I make it better?</li>
+            <li>
+              how can other people make use of it? (in a non-technical way)
+            </li>
+            <li>were there any other solutions?</li>
+          </ol>
+        </section>
+
+        <!-- 1 -->
+        <section>
+          <section data-auto-animate>
+            <h2>1. what did the website not do?</h2>
+          </section>
+          <section data-auto-animate>
+            <h2>1. what did the website not do?</h2>
+            <img
+              src="images/buswebsite_qr.png"
+              class="qr"
+              data-preview-link="/buswebsite/"
+            />
+          </section>
+        </section>
+
+        <!-- 2 -->
+        <section data-auto-animate>
+          <h2>2. how did I make it better?</h2>
+          <ol>
+            <li data-id="gdm">get data manually</li>
+            <li>get data automatically</li>
+            <li>re-host data in better format</li>
+          </ol>
+        </section>
+        <section>
+          <section data-auto-animate>
+            <h2>2. how did I make it better?</h2>
+            <p>get data manually</p>
+            <pre
+              data-id="code"
+            ><code data-trim data-noescape data-line-numbers class="language-bash">
+
+              curl https://app.weels.co/api/travels/
+                  38u1fj13-rfd8-q99a-ap22-ao92929ifikf/
+                  elegible-journey-groups
+
+              curl https://app.weels.co/api/stops/
+                  by_id?page=1&per_page=25
+
+              curl https://app.weels.co/api/travel-passes/
+                  38u1fj13-rfd8-q99a-ap22-ao92929ifikf/
+                  eligible-journey-groups
+
+              curl https://app.weels.co/api/journeys/
+                  capacity_between_stops
+            </code></pre>
+          </section>
+          <section data-auto-animate>
+            <h2>2. how did I make it better?</h2>
+            <p>get data manually</p>
+            <pre
+              data-id="code"
+            ><code data-trim data-noescape data-line-numbers class="language-bash">
+              https://app.weels.co/api/travel-passes/
+                  38u1fj13-rfd8-q99a-ap22-ao92929ifikf/
+                  eligible-journey-groups
+                  ?product_id=38u1fj13-rfd8-q99a-ap22-ao92929ifikf
+                  &origin_stop_id[]=38u1fj13-rfd8-q99a-ap22-ao92929ifikf
+                  &destination_stop_id[]=38u1fj13-rfd8-q99a-ap22-ao92929ifikf
+                  &tier_id[]=38u1fj13-rfd8-q99a-ap22-ao92929ifikf
+            </code></pre>
+          </section>
+          <section data-auto-animate>
+            <h2>2. how did I make it better?</h2>
+            <p>get data manually</p>
+            <pre><code data-trim data-noescape data-line-numbers class="language-json">
+              {"total_pages":1,"data":[{"journeys":[{"journey":{"journey_
+              type":"OUTBOUND","journey_stops":[{"location":{"stop_id":"0
+              -stop","stop_name":"Chapeltown"},"journey_stop_id":"0-0-OUT
+              BOUND","departure_datetime":"20260209081200 Europe/London"}
+              ,{"location":{"stop_id":"1-stop","stop_name":"Ecclesfield"}
+              ,"journey_stop_id":"0-1-OUTBOUND","departure_datetime":"202
+              60209081200 Europe/London"},{"location":{"stop_id":"2-stop"
+              ,"stop_name":"Southey Green"},"journey_stop_id":"0-2-OUTBOU
+              ND","departure_datetime":"20260209081200 Europe/London"},{"
+              location":{"stop_id":"3-stop","stop_name":"Shirecliffe"},"j
+              ourney_stop_id":"0-3-OUTBOUND","departure_datetime":"202602
+              09081200 Europe/London"},{"location":{"stop_id":"4-stop","s
+              top_name":"Pitsmoor"},"journey_stop_id":"0-4-OUTBOUND","dep
+              arture_datetime":"20260209081200 Europe/London"},{"location
+              ":{"stop_id":"5-stop","stop_name":"Sheffield"},"journey_sto
+              p_id":"0-5-OUTBOUND","departure_datetime":"20260209081200 E
+              urope/London"},{"location":{"stop_id":"6-stop","stop_name":
+              "Hunters Bar"},"journey_stop_id":"0-6-OUTBOUND","departure_
+              datetime":"20260209081200 Europe/London"},{"location":{"sto
+            </code></pre>
+          </section>
+          <section data-auto-animate>
+            <h2>2. how did I make it better?</h2>
+            <p>get data manually</p>
+            <p>schema:</p>
+            <pre><code data-trim data-noescape data-line-numbers class="language-yaml">
+              data: list (of days)
+                id: string (day id)
+                name: string
+                journeys: list (of journeys)
+                  id: string
+                  date: string
+                  journey:
+                    journey_type: OUTBOUND | RETURN
+                    id: string (used in journeys)
+                    origin_pickup_id: string (first stop)
+                    origin_pickup_name: string
+                    destination_pickup_id: string (last stop)
+                    destination_pickup_name: string
+                    journey_stops: list
+            </code></pre>
+          </section>
+        </section>
+        <section>
+          <section data-auto-animate>
+            <h2>2. how did I make it better?</h2>
+            <p>get data automatically</p>
+            <pre><code data-trim data-noescape data-line-numbers="3-10" class="language-python">
+              REQUEST_TIMEOUT = 30
+
+              ELIGIBLE_JOURNEYS_URL = (
+                "https://app.weels.co/api/travels/{pass_id}/
+                elegible-journey-groups"
+              )
+              CAPACITY_URL = (
+                "https://app.weels.co/api/journeys/
+                capacity_between_stops"
+              )
+            </code></pre>
+          </section>
+          <section data-auto-animate>
+            <h2>2. how did I make it better?</h2>
+            <p>get data automatically</p>
+            <pre><code data-trim data-noescape data-line-numbers class="language-python">
+              def get_all_journeys(pass_id):
+                  url = ELIGIBLE_JOURNEYS_URL.format(pass_id=pass_id)
+                  response = requests.get(url)
+                  result = json.loads(response.text)
+                  return parse(result)
+
+              def get_journey_capacities(journeys):
+                  url = CAPACITY_URL
+                  body = make_body(journeys)
+                  response = requests.post(url, json=body)
+                  result = json.loads(response.text)
+                  return result
+            </code></pre>
+          </section>
+        </section>
+
+        <!-- 3 -->
+        <section>
+          <section data-auto-animate>
+            <h2>3. how can others use it?</h2>
+            <p>Telegram bot</p>
+            <pre><code data-trim data-noescape data-line-numbers class="language-python">
+            from telegram import Application, CommandHandler
+
+            async def _start(update, context):
+                await update.message.reply_text("hi!")
+
+            def main():
+                application = Application.token(API_KEY).build()
+                application.add_handler(
+                    CommandHandler("start", _start)
+                )
+                application.run_polling()
+            </code></pre>
+          </section>
+          <!-- data-background-image="images/telegram_test-bot.png" -->
+          <section data-auto-animate>
+            <h2>3. how can others use it?</h2>
+            <p>Telegram bot</p>
+            <div class="r-stack">
+              <img src="images/telegram_test-bot.png" />
+              <img
+                src="images/telegram_test-bot-qr.png"
+                style="height: 40vh"
+                class="qr fragment"
+              />
+            </div>
+          </section>
+          <section data-auto-animate>
+            <h2>3. how can others use it?</h2>
+            <p>Telegram bot</p>
+            <ul>
+              <li>Entire timetable</li>
+              <li>Journey tracking</li>
+            </ul>
+            <br />
+            <img src="images/telegram_test-bot-qr.png" class="qr" />
+          </section>
+        </section>
+
+        <!-- 4 -->
+        <section>
+          <h2>4. were there any other solutions?</h2>
+          <ul>
+            <li>get a normal bus</li>
+            <li>drive</li>
+            <li>carpool?</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Conclusions</h2>
+          <ul>
+            <li>100 or so users</li>
+            <li>API was changed</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Notes</h2>
+          <p>Are you:</p>
+          <ul>
+            <li>Developer: maybe you want to make your API faster</li>
+            <li>Developer: maybe you want to make your API more closed off</li>
+            <li>User: maybe you like being able to send requests</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Other telegram bots</h2>
+          <ul>
+            <li>pollen bot</li>
+            <li>daily budgeter bot</li>
+            <li>whereamibot</li>
+          </ul>
+        </section>
       </div>
     </div>
 

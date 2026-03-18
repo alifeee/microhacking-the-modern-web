@@ -28,7 +28,7 @@
           <h1>Sheffield Events</h1>
         </section>
         <section data-auto-animate>
-          <h1>Sheffielv Events</h1>
+          <h1>Sheffield Events</h1>
           <ol>
             <li>what did the website not do?</li>
             <li>how did I make it better?</li>
@@ -46,23 +46,284 @@
           </section>
           <section data-auto-animate>
             <h2>1. what did the website not do?</h2>
+            <div class="r-stack">
+              <img src="images/events_welcometosheffield.png" />
+              <img
+                class="fragment"
+                src="images/events_welcometosheffield_filters.png"
+              />
+              <p
+                class="events-metadata-ideas fragment r-frame"
+                style="
+                  background-color: var(--r-background-color);
+                  padding: 3rem;
+                "
+              >
+                no metadata to <span>[make a calendar]</span> /
+                <span>[make a collage of events images]</span> /
+                <span
+                  >[keep track on exhibitions at the kelham island museum]</span
+                >
+                / <span>[make a plaintext search]</span>
+              </p>
+            </div>
+            <style>
+              .events-metadata-ideas span:nth-child(1) {
+                color: aqua;
+              }
+              .events-metadata-ideas span:nth-child(2) {
+                color: forestgreen;
+              }
+              .events-metadata-ideas span:nth-child(3) {
+                color: goldenrod;
+              }
+              .events-metadata-ideas span:nth-child(4) {
+                color: cadetblue;
+              }
+            </style>
           </section>
         </section>
 
         <!-- 2 -->
-        <section data-auto-animate>
-          <h2>2. how did I make it better?</h2>
-          <ol>
-            <li>get data automatically</li>
-            <li>re-host data in machine readable format</li>
-            <li>add application(s) built on top</li>
-          </ol>
+        <section>
+          <section>
+            <h2>2. how did I make it better? (scrape)</h2>
+            <ol>
+              <li>get data automatically (scrape)</li>
+              <li>re-host data in machine readable format (JSON, RSS)</li>
+              <li>add application(s) built on top</li>
+            </ol>
+          </section>
+          <section>
+            <h3 data-id="scrape">1. get data automatically (scrape)</h3>
+            <pre data-id="code" class="r-stretch">
+            <code data-trim data-noescape data-line-numbers class="language-bash">
+              URL="https://welcometosheffield.co.uk/visit/whats-on/all-events/"
+
+              curl -sL "${URL}?page=${page}"
+
+              echo $html | hxselect "div.search-result"
+
+              for event in $events; do
+                name=$(echo "${event}" | hxselect -c "div h3 a")
+                link=$(echo "${event}" | hxselect -c "div h3 a::attr(href)")
+                …
+                jq -n '{
+                  "name": $ARGS.positional[0],
+                  "link": ($ARGS.positional[1]),
+                  …
+                  }' \
+                  --args "${name}" "${link}" …
+              done
+
+              echo "${json}" | php -r 'echo html_entity_decode(STDIN);'
+               
+            </code></pre>
+          </section>
+          <section data-auto-animate>
+            <h3>2. re-host as machine readable</h3>
+            <h4>JSON</h4>
+            <pre data-id="code">
+              <code data-trim data-noescape data-line-numbers class="language-json">
+                {
+                  "name": "Feeling Fabulous Queer Dance Workshops",
+                  "link": "https://www.welcometosheffield.co.uk/
+                    content/events/feeling-fabulous-queer-
+                    dance-workshops/",
+                  "description": "Queer dance and movement workshops
+                    for all abilities from Ghetto Fabulous
+                    and Andro & Eve",
+                  "datetime": "17 Mar 2026 - 31 Mar 2026",
+                  "start_date": "17 Mar 2026",
+                  "end_date": "31 Mar 2026",
+                  "start_date_unix": "1773705600",
+                  "end_date_unix": "1774911600"
+                }
+              </code>
+            </pre>
+          </section>
+          <section data-auto-animate>
+            <h3>2. re-host as machine readable</h3>
+            <h4>RSS</h4>
+            <pre data-id="code" class="r-stretch">
+              <code data-trim data-noescape data-line-numbers class="language-json">
+                &lt;?xml version='1.0' encoding='UTF-8'?&gt;
+                &lt;feed xmlns="http://www.w3.org/2005/Atom"&gt;
+                &lt;title&gt;Sheffield events&lt;/title&gt;
+                &lt;updated&gt;2026-03-17T23:11:30Z&lt;/updated&gt;
+
+                &lt;entry&gt;
+                    &lt;title&gt;Feeling Fabulous Queer Dance Workshops&lt;/title&gt;
+                    &lt;link href="https://www.welcometosheffield.co.uk/
+                      content/events/feeling-fabulous-queer-dance-
+                      workshops/" /&gt;
+                    &lt;updated&gt;2026-03-17T00:00:00Z&lt;/updated&gt;
+                    &lt;summary&gt;
+                      Queer dance and movement workshops for all
+                      abilities from Ghetto Fabulous and Andro & Eve
+                    &lt;/summary&gt;
+                &lt;/entry&gt;
+
+                &lt;/feed&gt;
+              </code>
+            </pre>
+          </section>
+        </section>
+        <!-- 2.5 -->
+        <section>
+          <section data-auto-animate>
+            <h3>3. add application(s) built on top</h3>
+            <p>simple CGI</p>
+            <iframe
+              class="r-stretch"
+              style="background-color: white"
+              src="https://server.alifeee.net/sheffield/events/next_seven_days"
+            ></iframe>
+          </section>
+          <section data-auto-animate>
+            <h3>3. add application(s) built on top</h3>
+            <p>ActivityPub</p>
+            <div class="r-stack r-stretch">
+              <img src="images/events_activitybot.png" />
+              <pre class="r-stretch fragment fade-in-then-out">
+                <code data-trim data-noescape data-line-numbers class="language-php">
+                  $username = "events";
+                  $password = "289h7fh897a23h87u9fh23a";
+
+                  switch ( $path ) {
+                    case ".well-known/webfinger":
+                      webfinger();
+                    case "@" . $username:
+                      username();
+                    case "inbox":
+                      inbox();
+                    case "action/send":      
+                      send();
+                    …
+                  }
+
+                  function inbox() {…}
+                  function username() {…}
+                  …
+                </code>
+              </pre>
+              <pre class="r-stretch fragment">
+                <code data-trim data-noescape data-line-numbers class="language-bash" style="padding: 2rem 0.5rem">
+                  name=$(echo $event | jq .name)
+                  liṅk=$(echo $event | jq .liṅk)
+                  description=$(echo $event | jq .description)
+
+                  message='event in Sheffield!
+                  $name
+                  $link
+                  $description'
+                  
+                  echo $message \
+                    | curl -i -X POST -F "password=${PASSWORD}" \
+                      "https://events.sheffield.alifeee.net/action/send"
+                   
+                </code>
+              </pre>
+              <img
+                class="fragment r-frame"
+                src="images/events_mastodon-bot.png"
+              />
+            </div>
+          </section>
+          <section>
+            <h3>via cron</h3>
+            <pre>
+              <code data-trim data-noescape data-line-numbers data-ln-start-from="14" class="language-crontab">
+                 
+                # get latest sheffield events
+                0 4 * * * ./get_all.sh
+                5 4 * * * python feed.py > cgi/feed.xml
+
+                # post sheffield events to Mastodon bot
+                */15 * * * * ./check_posts.sh
+                 
+              </code>
+            </pre>
+          </section>
         </section>
 
         <!-- 3 -->
         <section>
           <section data-auto-animate>
             <h2>3. how can others use it?</h2>
+            <ul>
+              <li>
+                follow @events@events.sheffield.alifeee.net on the Fediverse
+              </li>
+              <li>subscribe to the RSS feed</li>
+              <li>do something custom with the JSON</li>
+            </ul>
+          </section>
+        </section>
+
+        <!-- X -->
+        <section>
+          <section data-auto-animate>
+            <h2>Why you shouldn't do this</h2>
+          </section>
+          <section data-auto-animate>
+            <h2>Why you shouldn't do this</h2>
+            <h3>1. dates are entirely inconsistent</h3>
+            <pre>
+              <code data-trim data-noescape data-line-numbers class="language-plaintext" style="padding: 2rem 0.5rem;">
+                17 Mar 2026 19:00 - 23:00
+                14 Mar 2026 - 04 Apr 2026
+                25 Apr 2026 12:00 - 17:00
+                25 Apr 2026 15:00 
+
+                09 Apr 2026 10:00 &amp;amp; 13:30
+                28 May 2026 11:00 / 14:30
+                28 May 2026 10:00 &amp;amp; 13:30
+                14 Mar 2026 13&amp;quot;00
+              </code>
+            </pre>
+          </section>
+          <section data-auto-animate>
+            <h2>Why you shouldn't do this</h2>
+            <h3>2. people love breaking URLs</h3>
+            <div class="r-stack">
+              <img src="images/events_404.png" />
+              <div
+                class="fragment r-frame"
+                style="
+                  background-color: var(--r-background-color);
+                  padding: 1rem;
+                "
+              >
+                <a href="https://www.w3.org/Provider/Style/URI"
+                  >cool URIs don't change</a
+                >
+                <pre style="min-width: 32rem">
+                  <code data-trim data-noescape data-line-numbers class="language-diff" style="padding: 2rem 0.5rem">
+                    - /visit/what-s-on/all-events/
+                    + /visit/whats-on/all-events/
+                  </code>
+                </pre>
+              </div>
+            </div>
+          </section>
+          <section data-auto-animate>
+            <h2>Why you shouldn't do this</h2>
+            <h3>3. people love changing markup</h3>
+            <pre>
+              <code data-trim data-noescape data-line-numbers data-ln-start-from="27" class="language-diff" style="padding: 2rem 0.5rem;">
+                 
+                # get final page
+                - hxselect "a[data-pagenumber]:nth-last-child(2) span"
+                + hxselect ".paginationV2 a::attr(href)" | sort -n
+
+                …
+
+                # get tags
+                - hxselect "div.tags small"
+                 
+              </code>
+            </pre>
           </section>
         </section>
 
@@ -74,6 +335,11 @@
         <!-- 5 -->
         <section>
           <h2>Conclusions</h2>
+          <p>
+            annoying bits: they change the URL (with no redirect); they change
+            the page structure (change CSS query); they internalise data (tags
+            no longer scrapable)
+          </p>
         </section>
       </div>
     </div>

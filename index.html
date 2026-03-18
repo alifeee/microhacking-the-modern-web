@@ -43,41 +43,61 @@
         <section>
           <h2>intermission 1</h2>
           <h3>Personal Website Roulette</h3>
+          <!-- 
+          to generate: copy list, then run (to generate QRs and generate HTML)
+          rm -f images/qroulette/*
+          while read url; do
+            fn=$(echo "${url}" | sed -E 's+^https?://++;s+/$++;s+/+_+g')
+            qrencode -m2 "${url}" -o "images/qroulette/${fn}.png"
+          done <<< $(cat index.html \
+            | awk '/^ *QROULETTE_END$/{a=0} a==1{print} /^ *QROULETTE_START$/{a=1}' \
+            | sed 's+^ *++;'
+          )
+          find images/qroulette/ -type f | sort --random-sort \
+            | sed 's+^+<img src="+;s+$+" />+' | setclip
+
+          QROULETTE_START
+          https://lili.gay/
+          https://ramona.diy/
+          https://www.zx2c4.com/
+          https://typedef.io/
+          https://sadgrl.online/
+          https://possiblyaxolotl.com/
+          https://laserbat.pw/
+          https://www.matthias-heil.co.uk/new_webpage/index.html
+          https://robert.mathmos.net/
+          https://jonty.co.uk/
+          https://henry.codes/
+          https://le.alphamethyl.barr0w.net/~elysia/
+          QROULETTE_END
+          -->
           <div class="qroulette">
+            <img src="images/qroulette/ramona.diy.png" />
+            <img src="images/qroulette/typedef.io.png" />
+            <img src="images/qroulette/robert.mathmos.net.png" />
+            <img src="images/qroulette/www.zx2c4.com.png" />
             <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
-            <img src="images/qroulette/lili.gay.png" />
+            <img src="images/qroulette/sadgrl.online.png" />
+            <img src="images/qroulette/possiblyaxolotl.com.png" />
+            <img src="images/qroulette/le.alphamethyl.barr0w.net_~elysia.png" />
+            <img src="images/qroulette/laserbat.pw.png" />
+            <img
+              src="images/qroulette/www.matthias-heil.co.uk_new_webpage_index.html.png"
+            />
+            <img src="images/qroulette/henry.codes.png" />
+            <img src="images/qroulette/jonty.co.uk.png" />
           </div>
+          <style>
+            .qroulette {
+              display: grid;
+              grid-template-columns: repeat(7, 1fr);
+              justify-content: center;
+              align-items: center;
+              img {
+                margin: 0.5rem auto;
+              }
+            }
+          </style>
         </section>
         <section>
           <h2>talk 2 – renpho</h2>

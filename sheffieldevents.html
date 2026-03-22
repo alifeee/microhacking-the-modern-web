@@ -16,6 +16,24 @@
     <!-- Theme used for syntax highlighted code -->
     <link rel="stylesheet" href="plugin/highlight/monokai.css" />
     <style>
+      @font-face {
+        font-family: "Sheffield Headline";
+        src: url("dist/theme/fonts/sheffield/SheffieldHeadline.woff2");
+      }
+      @font-face {
+        font-family: "Sheffield Stencil";
+        src: url("dist/theme/fonts/sheffield/SheffieldStencil.woff2");
+      }
+      :root {
+        --r-background-color: white;
+        --r-main-color: black;
+        --r-heading-color: var(--r-main-color);
+        --r-main-font: Helvetica Neue, Helvetica, Arial, sans-serif;
+        --r-heading-font:
+          Sheffield Stencil, Helvetica Neue, Helvetica, Arial, sans-serif;
+        --r-link-color: #fc157a;
+        --r-heading2-size: 1.4em;
+      }
       .qr {
         image-rendering: pixelated;
       }

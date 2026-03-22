@@ -16,6 +16,23 @@
     <!-- Theme used for syntax highlighted code -->
     <link rel="stylesheet" href="plugin/highlight/monokai.css" />
     <style>
+      @font-face {
+        font-family: "Avenir Heavy";
+        src: url("dist/theme/fonts/avenir/Avenir-Heavy.otf");
+      }
+      @font-face {
+        font-family: "Avenir Book";
+        src: url("dist/theme/fonts/avenir/Avenir-Book.woff");
+      }
+      :root {
+        --r-background-color: #020348;
+        --r-main-color: #faeff4;
+        --r-heading-color: var(--r-main-color);
+        --r-main-font: "Avenir Book";
+        --r-heading-font: "Avenir Heavy";
+        --r-link-color: #fc157a;
+        --r-heading2-size: 1.4em;
+      }
       .qr {
         image-rendering: pixelated;
       }

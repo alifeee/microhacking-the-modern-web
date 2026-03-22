@@ -1,4 +1,4 @@
-# Microhacking the modern web
+# Microhacking the Modern Web
 
 talk for Front End Sheffield March 2026
 

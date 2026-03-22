@@ -27,6 +27,84 @@
       <div class="slides">
         <section data-auto-animate>
           <h1>Microhacking the Modern Web</h1>
+          <div class="contact">
+            <div class="item">
+              <div class="images">
+                <iframe src="/" class="r-frame"></iframe>
+                <img
+                  src="images/qr_talk.png"
+                  class="fragment fade-in"
+                  data-fragment-index="1"
+                />
+              </div>
+              <span>talk slides</span>
+              <a href="https://alifeee.net/microhacking-the-modern-web/">
+                https://alifeee.net/microhacking-the-modern-web/
+              </a>
+            </div>
+            <div class="item">
+              <div class="images">
+                <img src="https://alifeee.net/profile-picture.png" />
+                <img
+                  src="images/qr_alifeee.net.png"
+                  class="fragment fade-in"
+                  data-fragment-index="1"
+                />
+              </div>
+              <span>alifeee</span>
+              <a href="https://alifeee.net/"> https://alifeee.net/ </a>
+            </div>
+            <div class="item">
+              <div class="images">
+                <img
+                  src="https://neilgaryallen.dev/media/pages/blog/i-revived-an-old-adobe-premiere-project-in-a-turtlesque-fashion/5161e10d7a-1767574280/screenshot-2026-01-05-003742.png"
+                />
+                <img
+                  src="images/qr_neilgaryallen.dev"
+                  class="fragment fade-in"
+                  data-fragment-index="1"
+                />
+              </div>
+              <span>Neil</span>
+              <a href="https://neilgaryallen.dev/">
+                https://neilgaryallen.dev/
+              </a>
+            </div>
+          </div>
+          <style>
+            .contact {
+              display: grid;
+              grid-template-columns: 1fr 1fr 1fr;
+              gap: 1rem;
+              .item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                max-width: 15rem;
+                .images {
+                  position: relative;
+                  height: 10rem;
+                  width: 10rem;
+                  img {
+                    width: 100%;
+                    max-width: 100%;
+                    height: auto;
+                    max-height: 100%;
+                    image-rendering: pixelated;
+                    margin: 0;
+                  }
+                  img:nth-child(2) {
+                    position: absolute;
+                    inset: 0;
+                  }
+                }
+                a {
+                  font-size: 1rem;
+                  overflow-wrap: break-word;
+                }
+              }
+            }
+          </style>
         </section>
         <section data-auto-animate>
           <h1>Microhacking the Modern Web</h1>

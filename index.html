@@ -186,7 +186,39 @@
         </section>
         <section>
           <h2>intermission 2</h2>
-          <p>something interesting here (favourite blog?)</p>
+          <p>the Front End Sheffield technobabbler</p>
+          <iframe
+            class="r-stretch r-frame"
+            src="http://server.alifeee.net/fesbabble/"
+          ></iframe>
+          <p style="font-size: small">
+            <a href="http://server.alifeee.net/fesbabble/"
+              >http://server.alifeee.net/fesbabble/</a
+            >
+            —
+            <a href="https://maurycyz.com/projects/trap_bots/">
+              https://maurycyz.com/projects/trap_bots/
+            </a>
+          </p>
+          <!-- # assemble texts
+            # copy the event list HTML from after scrolling to reveal all events
+            #   https://www.meetup.com/front-end-sheffield/
+            cat talks.html | hxnormalize -x -l 240 | hxselect -s '\n' -c 'p' \
+              | python3 -c 'import sys;from html import unescape;print(unescape(sys.stdin.read()),end="")' \
+              | sed '/^-*$/d; /^\**$/d; /^=*$/d' \
+              | sed 's+• ++g; s+<br></br>++; s+^ *++; s+</if*strong>++g; s+</p*em>++g;' \
+              > book.txt
+            length=$(cat book.txt | wc -l)
+            split -a1 -l $(( $length / 3 )) --numeric-suffixes=1 --additional-suffix=.txt \
+              book.txt book
+
+            # make babbler - see https://maurycyz.com/projects/trap_bots/ for more context
+            wget https://maurycyz.com/projects/trap_bots/process.py
+            wget https://maurycyz.com/projects/trap_bots/babble.c
+            python3 process.py
+            sed -i 's+#define PORT .*+#define PORT 4415+' babble.c
+            sed -i 's+const char\* URL_PREFIX = ".*+const char* URL_PREFIX = "/fesbabble/" ;+' babble.c
+            -->
         </section>
         <section>
           <h2>talk 3 – sheffield events</h2>

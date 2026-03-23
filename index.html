@@ -117,12 +117,25 @@
         </section>
         <section data-auto-animate>
           <h1>Microhacking the Modern Web</h1>
-          <ul>
+          <ul class="mtmwintro">
             <li>Bad Frontend Sheffield</li>
-            <li>Backend Sheffield</li>
-            <li>Interdisciplinary Sheffield (as all dabbling is)</li>
+            <li>
+              Backend Sheffield
+              <span style="font-size: 2rem">
+                (<code>jq</code>,
+                <code>hxselect</code>, <code>Python</code>, <code>PHP</code>)
+              </span>
+            </li>
+            <li>
+              Interdisciplinary Sheffield <span>(as all dabbling is)</span>
+            </li>
             <li>Back to Front End Sheffield</li>
           </ul>
+          <style>
+            .mtmwintro li span:first-child {
+              color: var(--r-link-color-hover);
+            }
+          </style>
         </section>
         <section>
           <h2>talk 1 – bus bot</h2>
